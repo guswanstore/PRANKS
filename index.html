@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎡 Spin Prank · Roda Berputar Lagi!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #0b0e1a 0%, #1a1f30 100%);
+      padding: 16px;
+    }
+
+    .card {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 48px 48px 32px 32px;
+      padding: 28px 24px 40px;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+      padding: 0 4px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f7e05e, #f9b042);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header h1 span {
+      font-size: 26px;
+    }
+
+    .badge {
+      background: rgba(255, 215, 0, 0.15);
+      padding: 8px 14px;
+      border-radius: 60px;
+      font-size: 14px;
+      color: #ffd966;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      backdrop-filter: blur(4px);
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      margin: 8px auto 20px;
+      width: 100%;
+      aspect-ratio: 1/1;
+      max-width: 420px;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 50%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(255, 215, 0, 0.2);
+      background: #2a2f45;
+      cursor: pointer;
+      transition: box-shadow 0.3s;
+    }
+
+    canvas:active {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.9), 0 0 0 4px #f7c948;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 22px solid transparent;
+      border-right: 22px solid transparent;
+      border-top: 34px solid #facc15;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6));
+      z-index: 10;
+    }
+
+    .pointer::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: -10px;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #fde047, #eab308);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #facc15;
+    }
+
+    .result-area {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 60px;
+      padding: 10px 18px 10px 24px;
+      margin: 16px 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(4px);
+    }
+
+    .result-label {
+      color: #aab3d0;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .result-value {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fde047, #f59e0b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      min-width: 80px;
+      text-align: right;
+      transition: 0.2s;
+    }
+
+    .result-value.trolled {
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-decoration: line-through 2px #ef4444;
+    }
+
+    .result-value.prank-anim {
+      animation: blinkPrank 0.5s ease 3;
+    }
+
+    @keyframes blinkPrank {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.2); color: #ef4444; }
+    }
+
+    .register-box {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 40px;
+      padding: 20px 18px;
+      margin: 10px 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .input-group label {
+      color: #d3defa;
+      font-weight: 500;
+      font-size: 15px;
+      min-width: 70px;
+    }
+
+    .input-group input {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 18px;
+      border-radius: 60px;
+      border: none;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      color: white;
+      font-size: 16px;
+      font-weight: 400;
+      outline: 1px solid rgba(255, 255, 255, 0.06);
+      transition: 0.2s;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .input-group input:focus {
+      outline: 2px solid #facc15;
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .input-group input::placeholder {
+      color: #7b84a6;
+      font-weight: 300;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 60px;
+      border: none;
+      background: linear-gradient(145deg, #facc15, #eab308);
+      color: #0b0e1a;
+      font-weight: 700;
+      font-size: 17px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      box-shadow: 0 8px 18px rgba(250, 204, 21, 0.25);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+
+    .btn:active {
+      transform: scale(0.94);
+      box-shadow: 0 2px 10px rgba(250, 204, 21, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      transform: scale(0.96);
+      pointer-events: none;
+      filter: grayscale(0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #cfdbfa;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: none;
+      flex: 0.6;
+    }
+
+    .btn-secondary:active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .register-name {
+      color: #b9c6f0;
+      font-size: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px 14px;
+      border-radius: 30px;
+      display: inline-block;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .register-name strong {
+      color: #fde047;
+      font-weight: 600;
+    }
+
+    .footer-tip {
+      text-align: center;
+      font-size: 13px;
+      color: #6d7aa0;
+      margin-top: 20px;
+      letter-spacing: 0.2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+      padding-top: 18px;
+    }
+
+    .footer-tip i {
+      font-style: normal;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 20px 16px 30px; border-radius: 32px; }
+      .header h1 { font-size: 18px; }
+      .badge { font-size: 12px; padding: 4px 12px; }
+      .result-value { font-size: 22px; min-width: 60px; }
+      .btn { padding: 12px 20px; font-size: 15px; }
+      .input-group input { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1><span>🎡</span> Spin Berhadiah</h1>
+    <div class="badge">✨ Berhadiah no tipu tipu</div>
+  </div>
+
+  <div class="wheel-wrapper">
+    <canvas id="wheelCanvas" width="600" height="600"></canvas>
+    <div class="pointer"></div>
+  </div>
+
+  <div class="result-area">
+    <span class="result-label">🏆 hasil</span>
+    <span class="result-value" id="resultDisplay">—</span>
+  </div>
+
+  <div class="register-box">
+    <div class="input-group">
+      <label for="username">👤 nama</label>
+      <input type="text" id="username" placeholder="Masukkan nama" value="Peserta" maxlength="20">
+    </div>
+    <div class="actions">
+      <button class="btn" id="spinBtn">🎲 Putar</button>
+      <button class="btn btn-secondary" id="resetBtn">↺ reset</button>
+    </div>
+    <div id="greeting" class="register-name">Halo, <strong id="displayName">Peserta</strong> 👋</div>
+  </div>
+
+  <div class="footer-tip">
+    <i></i>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ========== KONFIGURASI ==========
+    const SEGMENTS = [
+      { label: '1 Perak', value: 1 },
+      { label: '10k', value: 10000 },
+      { label: '50k', value: 50000 },
+      { label: '75k', value: 75000 },
+      { label: '100k', value: 100000 },
+    ];
+
+    const VALUE_TO_INDEX = { 1: 0, 10000: 1, 50000: 2, 75000: 3, 100000: 4 };
+    const PRANK_VALUES = [10000, 50000, 75000, 100000]; // nilai yang kena prank
+
+    const COLORS = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'];
+    const PI = Math.PI;
+    const TAU = PI * 2;
+    const segmentAngle = TAU / SEGMENTS.length;
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const spinBtn = document.getElementById('spinBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const usernameInput = document.getElementById('username');
+    const displayNameSpan = document.getElementById('displayName');
+
+    // state
+    let currentRotation = 0;
+    let isSpinning = false;
+    let isPrankMode = false; // sedang menjalankan prank putar kedua?
+    let animationId = null;
+
+    // ========== DRAW WHEEL ==========
+    function drawWheel(rotation) {
+      const w = canvas.width, h = canvas.height;
+      const radius = Math.min(w, h) * 0.44;
+      const cx = w / 2, cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 6;
+
+      for (let i = 0; i < SEGMENTS.length; i++) {
+        const start = i * segmentAngle + rotation;
+        const end = start + segmentAngle;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, end);
+        ctx.closePath();
+        ctx.fillStyle = COLORS[i % COLORS.length];
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.shadowBlur = 20;
+      }
+
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      for (let i = 0; i < SEGMENTS.length; i++) {
+        const mid = i * segmentAngle + segmentAngle / 2 + rotation;
+        const textRadius = radius * 0.7;
+        const x = cx + Math.cos(mid) * textRadius;
+        const y = cy + Math.sin(mid) * textRadius;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(mid + PI / 2);
+        ctx.fillStyle = '#0b0e1a';
+        ctx.font = 'bold 22px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 8;
+        ctx.fillText(SEGMENTS[i].label, 0, 0);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(SEGMENTS[i].label, 0, 0);
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 20, 0, TAU);
+      ctx.fillStyle = '#1e243b';
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // ========== GET SEGMENT INDEX ==========
+    function getSegmentIndex(rotation) {
+      let rot = rotation % TAU;
+      if (rot < 0) rot += TAU;
+      const pointerAngle = -PI / 2;
+      for (let i = 0; i < SEGMENTS.length; i++) {
+        const start = i * segmentAngle + rotation;
+        const end = start + segmentAngle;
+        let p = pointerAngle;
+        while (p < start) p += TAU;
+        while (p >= end) p -= TAU;
+        if (p >= start && p < end) return i;
+      }
+      return 0;
+    }
+
+    // ========== SPIN UTAMA ==========
+    function spinWheel(callback, extraSpinsMin = 5, extraSpinsMax = 9, durationMin = 3000, durationMax = 4200) {
+      if (isSpinning) return;
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      const randomIndex = Math.floor(Math.random() * SEGMENTS.length);
+      const targetAngle = (randomIndex * segmentAngle) + segmentAngle / 2;
+      let targetRotation = (-PI / 2) - targetAngle;
+      while (targetRotation < 0) targetRotation += TAU;
+      targetRotation = targetRotation % TAU;
+
+      const extraSpins = extraSpinsMin + Math.floor(Math.random() * (extraSpinsMax - extraSpinsMin + 1));
+      const totalRotation = targetRotation + extraSpins * TAU;
+      const startRotation = currentRotation;
+      const deltaRotation = totalRotation - startRotation;
+      const duration = durationMin + Math.random() * (durationMax - durationMin);
+      const startTime = performance.now();
+
+      function animate(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const currentRot = startRotation + deltaRotation * ease;
+        currentRotation = currentRot;
+        drawWheel(currentRot);
+
+        if (progress < 1) {
+          animationId = requestAnimationFrame(animate);
+        } else {
+          currentRotation = startRotation + deltaRotation;
+          drawWheel(currentRotation);
+          isSpinning = false;
+          spinBtn.disabled = false;
+          animationId = null;
+
+          const landedIndex = getSegmentIndex(currentRotation);
+          const landedValue = SEGMENTS[landedIndex].value;
+          if (callback) callback(landedValue, landedIndex);
+        }
+      }
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // ========== PRANK: PUTAR LAGI KE 1 PERAK ==========
+    function doPrankSpin() {
+      // putar ke segmen 1 Perak (index 0)
+      isPrankMode = true;
+      resultDisplay.textContent = '🔄 PRANK!';
+      resultDisplay.classList.add('prank-anim');
+
+      // paksa putar ke index 0 (1 Perak)
+      function prankCallback(value, index) {
+        isPrankMode = false;
+        // pastikan benar-benar 1 Perak
+        if (index === 0) {
+          resultDisplay.textContent = '1 Perak (prank!)';
+          resultDisplay.classList.add('trolled');
+        } else {
+          // fallback: seharusnya ga terjadi, tapi amankan
+          resultDisplay.textContent = '1 Perak';
+          resultDisplay.classList.add('trolled');
+        }
+        resultDisplay.classList.remove('prank-anim');
+        spinBtn.disabled = false;
+      }
+
+      // panggil spin dengan target khusus ke index 0
+      // kita set extra spin sedikit biar terlihat natural
+      const targetAngle = (0 * segmentAngle) + segmentAngle / 2;
+      let targetRotation = (-PI / 2) - targetAngle;
+      while (targetRotation < 0) targetRotation += TAU;
+      targetRotation = targetRotation % TAU;
+
+      const extraSpins = 3 + Math.floor(Math.random() * 4); // 3-6 putaran
+      const totalRotation = targetRotation + extraSpins * TAU;
+      const startRotation = currentRotation;
+      const deltaRotation = totalRotation - startRotation;
+      const duration = 2500 + Math.random() * 1500;
+      const startTime = performance.now();
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      function animatePrank(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const currentRot = startRotation + deltaRotation * ease;
+        currentRotation = currentRot;
+        drawWheel(currentRot);
+
+        if (progress < 1) {
+          animationId = requestAnimationFrame(animatePrank);
+        } else {
+          currentRotation = startRotation + deltaRotation;
+          drawWheel(currentRotation);
+          isSpinning = false;
+          spinBtn.disabled = false;
+          animationId = null;
+
+          // verifikasi
+          const landedIndex = getSegmentIndex(currentRotation);
+          if (landedIndex === 0) {
+            resultDisplay.textContent = '1 Perak (prank!)';
+            resultDisplay.classList.add('trolled');
+          } else {
+            resultDisplay.textContent = '1 Perak';
+            resultDisplay.classList.add('trolled');
+          }
+          resultDisplay.classList.remove('prank-anim');
+          isPrankMode = false;
+        }
+      }
+      animationId = requestAnimationFrame(animatePrank);
+    }
+
+    // ========== SPIN UTAMA + CEK PRANK ==========
+    function performSpin() {
+      if (isSpinning || isPrankMode) return;
+
+      const name = usernameInput.value.trim() || 'Peserta';
+      displayNameSpan.textContent = name;
+
+      resultDisplay.classList.remove('trolled', 'prank-anim');
+
+      spinWheel(function(landedValue, landedIndex) {
+        // cek apakah landedValue termasuk prank
+        if (PRANK_VALUES.includes(landedValue)) {
+          // TAMPILIN DULU HASIL ASLI sebentar
+          let displayText = '';
+          if (landedValue === 100000) displayText = '100k';
+          else if (landedValue === 10000) displayText = '10k';
+          else if (landedValue === 50000) displayText = '50k';
+          else if (landedValue === 75000) displayText = '75k';
+          resultDisplay.textContent = displayText;
+          resultDisplay.classList.remove('trolled');
+
+          // kasih jeda 600ms biar keliatan hasil aslinya, lalu prank
+          setTimeout(() => {
+            doPrankSpin();
+          }, 600);
+        } else {
+          // hasil normal (1 Perak)
+          resultDisplay.textContent = '1 Perak';
+          resultDisplay.classList.remove('trolled');
+        }
+      });
+    }
+
+    // ========== RESET ==========
+    function resetWheel() {
+      if (isSpinning || isPrankMode) {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        isSpinning = false;
+        isPrankMode = false;
+        spinBtn.disabled = false;
+      }
+      currentRotation = 0;
+      drawWheel(0);
+      resultDisplay.textContent = '—';
+      resultDisplay.classList.remove('trolled', 'prank-anim');
+      const name = usernameInput.value.trim() || 'Peserta';
+      displayNameSpan.textContent = name;
+    }
+
+    // ========== EVENT ==========
+    spinBtn.addEventListener('click', performSpin);
+    resetBtn.addEventListener('click', resetWheel);
+    canvas.addEventListener('click', performSpin);
+
+    usernameInput.addEventListener('input', function() {
+      const name = this.value.trim() || 'Peserta';
+      displayNameSpan.textContent = name;
+    });
+
+    // inisialisasi
+    drawWheel(0);
+    displayNameSpan.textContent = 'Peserta';
+    usernameInput.value = 'Peserta';
+
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => drawWheel(currentRotation), 100);
+    });
+
+  })();
+</script>
+
+</body>
+</html>
